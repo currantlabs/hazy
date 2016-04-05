@@ -31,7 +31,7 @@ func (id ID) IsZero() bool {
 	return id.Clear == 0
 }
 
-func (id ID) Equals(other ID) bool {
+func (id ID) Equal(other ID) bool {
 	return id.Clear == other.Clear
 }
 
