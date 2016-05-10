@@ -11,7 +11,7 @@ func (id ID) MarshalJSON() ([]byte, error) {
 	if id.Clear == 0 {
 		return jsonNull, nil
 	}
-	return json.Marshal(string(encode(id.Hazy)))
+	return json.Marshal(string(Base32Encode(id.Hazy)))
 }
 
 func (id *ID) UnmarshalJSON(input []byte) error {
@@ -25,7 +25,7 @@ func (id *ID) UnmarshalJSON(input []byte) error {
 	if err != nil {
 		return err
 	}
-	val, err := decode([]byte(s))
+	val, err := Base32Decode([]byte(s))
 	if err != nil {
 		return err
 	}

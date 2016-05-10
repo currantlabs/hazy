@@ -1,5 +1,10 @@
 package hazy
 
+func (id ID) Bytes() []byte {
+	b, _ := id.Marshal()
+	return b
+}
+
 func (id ID) Marshal() ([]byte, error) {
 	if id.IsZero() {
 		return nil, nil

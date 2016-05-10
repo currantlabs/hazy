@@ -1,6 +1,9 @@
 package hazy
 
-import "database/sql/driver"
+import (
+	"database/sql/driver"
+	"strconv"
+)
 
 func (id *ID) Scan(value interface{}) error {
 	if value == nil {
@@ -12,6 +15,13 @@ func (id *ID) Scan(value interface{}) error {
 		id.Hazy = obscure(v)
 	case int64:
 		id.Clear = uint64(v)
+		id.Hazy = obscure(id.Clear)
+	case []byte:
+		var err error
+		id.Clear, err = strconv.ParseUint(string(v), 10, 64)
+		if err != nil {
+			return err
+		}
 		id.Hazy = obscure(id.Clear)
 	default:
 		return ErrInvalidDBValue

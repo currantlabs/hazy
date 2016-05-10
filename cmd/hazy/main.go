@@ -12,13 +12,20 @@ import (
 )
 
 type result struct {
-	Prime   string
-	Coprime string
-	Pepper  string
+	Prime      string
+	Coprime    string
+	Pepper     string
+	PrimeHex   string
+	CoprimeHex string
+	PepperHex  string
 }
 
 var resultTemp = template.Must(template.New("result").Parse(
 	`Hazy parameter generation complete!
+
+Prime: {{.Prime}}
+Coprime: {{.Coprime}}
+Pepper: {{.Pepper}}
 
 Paste the following into your go program before using hazy.ID:
 
@@ -28,7 +35,7 @@ import (
 	"github.com/currantlabs/hazy"
 )
 
-hazy.Initialize(0x{{.Prime}}, 0x{{.Coprime}}, 0x{{.Pepper}})
+hazy.Initialize(0x{{.PrimeHex}}, 0x{{.CoprimeHex}}, 0x{{.PepperHex}})
 
 `))
 
@@ -42,7 +49,14 @@ func main() {
 	test(prime, prime, coprime, pepper)
 	test(coprime, prime, coprime, pepper)
 	test(18446744073709551615, prime, coprime, pepper)
-	resultTemp.Execute(os.Stdout, &result{Prime: fmt.Sprintf("%x", prime), Coprime: fmt.Sprintf("%x", coprime), Pepper: fmt.Sprintf("%x", pepper)})
+	resultTemp.Execute(os.Stdout, &result{
+		Prime:      fmt.Sprintf("%v", prime),
+		Coprime:    fmt.Sprintf("%v", coprime),
+		Pepper:     fmt.Sprintf("%v", pepper),
+		PrimeHex:   fmt.Sprintf("%x", prime),
+		CoprimeHex: fmt.Sprintf("%x", coprime),
+		PepperHex:  fmt.Sprintf("%x", pepper),
+	})
 }
 
 func generatePrime() uint64 {

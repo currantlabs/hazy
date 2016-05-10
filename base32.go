@@ -44,7 +44,7 @@ var decodeVals = [256]byte{
 	null, null, null, null, null, null, null, null,
 }
 
-func encode(id uint64) []byte {
+func Base32Encode(id uint64) []byte {
 	const mask = 0x1F
 	return []byte{
 		encodeChars[byte(id>>0&mask)],
@@ -63,14 +63,14 @@ func encode(id uint64) []byte {
 	}
 }
 
-func decode(s []byte) (uint64, error) {
-	if len(s) != 13 {
+func Base32Decode(s []byte) (uint64, error) {
+	if len(s) != IDLength {
 		return 0, ErrInvalidIDLength
 	}
 	var val uint64
 	var shift uint64
 	var b byte
-	for i := 0; i < 13; i++ {
+	for i := 0; i < IDLength; i++ {
 		b = decodeVals[s[i]]
 		if b == null {
 			return 0, ErrInvalidID

@@ -4,7 +4,7 @@ func (id ID) MarshalText() (text []byte, err error) {
 	if id.IsZero() {
 		return []byte(""), nil
 	}
-	return encode(id.Hazy), nil
+	return Base32Encode(id.Hazy), nil
 }
 
 func (id *ID) UnmarshalText(text []byte) error {
@@ -13,7 +13,7 @@ func (id *ID) UnmarshalText(text []byte) error {
 		id.Hazy = 0
 		return nil
 	}
-	v, err := decode(text)
+	v, err := Base32Decode(text)
 	if err != nil {
 		return err
 	}

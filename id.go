@@ -2,6 +2,7 @@ package hazy
 
 import (
 	"math/big"
+	"sync"
 )
 
 type ID struct {
@@ -9,10 +10,18 @@ type ID struct {
 	Hazy  uint64
 }
 
+const IDLength = 13
+
 var Prime *big.Int
 var Coprime *big.Int
 var Pepper uint64
 var uint64Max = new(big.Int).SetUint64(18446744073709551615)
+
+var pool = sync.Pool{
+	New: func() interface{} {
+		return new(big.Int)
+	},
+}
 
 func Initialize(prime uint64, coprime uint64, pepper uint64) error {
 	Prime = new(big.Int).SetUint64(prime)
@@ -20,9 +29,6 @@ func Initialize(prime uint64, coprime uint64, pepper uint64) error {
 		return ErrInvalidPrime
 	}
 	Coprime = new(big.Int).SetUint64(coprime)
-	if !Coprime.ProbablyPrime(40) {
-		return ErrInvalidCoprime
-	}
 	Pepper = pepper
 	return nil
 }
@@ -36,7 +42,7 @@ func (id ID) Equal(other ID) bool {
 }
 
 func (id ID) String() string {
-	return string(encode(id.Hazy))
+	return string(Base32Encode(id.Hazy))
 }
 
 func Obscure(id uint64) ID {
@@ -54,19 +60,21 @@ func Reveal(id uint64) ID {
 }
 
 func obscure(id uint64) uint64 {
-	var i big.Int
+	i := pool.Get().(*big.Int)
 	i.SetUint64(id)
-	i.Mul(&i, Prime)
-	i.And(&i, uint64Max)
+	i.Mul(i, Prime)
+	i.And(i, uint64Max)
 	id = i.Uint64() ^ Pepper
+	pool.Put(i)
 	return id
 }
 
 func reveal(id uint64) uint64 {
-	var i big.Int
+	i := pool.Get().(*big.Int)
 	i.SetUint64(id ^ Pepper)
-	i.Mul(&i, Coprime)
-	i.And(&i, uint64Max)
+	i.Mul(i, Coprime)
+	i.And(i, uint64Max)
 	id = i.Uint64()
+	pool.Put(i)
 	return id
 }
