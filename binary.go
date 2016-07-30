@@ -6,9 +6,6 @@ func (id ID) Bytes() []byte {
 }
 
 func (id ID) Marshal() ([]byte, error) {
-	if id.IsZero() {
-		return nil, nil
-	}
 	b := []byte{
 		byte(id.Hazy),
 		byte(id.Hazy >> 8),
@@ -23,9 +20,6 @@ func (id ID) Marshal() ([]byte, error) {
 }
 
 func (id ID) MarshalTo(data []byte) (n int, err error) {
-	if id.IsZero() {
-		return 0, nil
-	}
 	if len(data) < 8 {
 		return 0, ErrInvalidIDLength
 	}
