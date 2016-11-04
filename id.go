@@ -61,27 +61,27 @@ func Reveal(id uint64) ID {
 
 func obscure(id uint64) uint64 {
 	i := pool.Get().(*big.Int)
-	i.SetUint64(id)
-	i.Mul(i, Prime)
-	i.And(i, uint64Max)
-	id = i.Uint64() ^ Pepper
-	pool.Put(i)
-	return id
-}
-
-func reveal(id uint64) uint64 {
-	i := pool.Get().(*big.Int)
 	i.SetUint64(id ^ Pepper)
-	i.Mul(i, Coprime)
+	i.Mul(i, Prime)
 	i.And(i, uint64Max)
 	id = i.Uint64()
 	pool.Put(i)
 	return id
 }
 
-func ObscureWithPrime(id uint64, prime uint64, pepper uint64) (uint64, error) {
+func reveal(id uint64) uint64 {
 	i := pool.Get().(*big.Int)
 	i.SetUint64(id)
+	i.Mul(i, Coprime)
+	i.And(i, uint64Max)
+	id = i.Uint64() ^ Pepper
+	pool.Put(i)
+	return id
+}
+
+func ObscureWithPrime(id uint64, prime uint64, pepper uint64) (uint64, error) {
+	i := pool.Get().(*big.Int)
+	i.SetUint64(id ^ pepper)
 	p := pool.Get().(*big.Int)
 	p.SetUint64(prime)
 	if !p.ProbablyPrime(40) {
@@ -89,7 +89,7 @@ func ObscureWithPrime(id uint64, prime uint64, pepper uint64) (uint64, error) {
 	}
 	i.Mul(i, p)
 	i.And(i, uint64Max)
-	id = i.Uint64() ^ pepper
+	id = i.Uint64()
 	pool.Put(i)
 	pool.Put(p)
 	return id, nil
@@ -97,12 +97,12 @@ func ObscureWithPrime(id uint64, prime uint64, pepper uint64) (uint64, error) {
 
 func RevealWithCoprime(id uint64, coprime uint64, pepper uint64) uint64 {
 	i := pool.Get().(*big.Int)
-	i.SetUint64(id ^ pepper)
+	i.SetUint64(id)
 	cp := pool.Get().(*big.Int)
 	cp.SetUint64(coprime)
 	i.Mul(i, cp)
 	i.And(i, uint64Max)
-	id = i.Uint64()
+	id = i.Uint64() ^ pepper
 	pool.Put(i)
 	return id
 }
