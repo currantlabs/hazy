@@ -11,18 +11,15 @@ func (id *ID) Scan(value interface{}) error {
 	}
 	switch v := value.(type) {
 	case uint64:
-		id.Clear = v
-		id.Hazy = obscure(v)
+		*id = ID(obscure(v))
 	case int64:
-		id.Clear = uint64(v)
-		id.Hazy = obscure(id.Clear)
+		*id = ID(obscure(uint64(v)))
 	case []byte:
-		var err error
-		id.Clear, err = strconv.ParseUint(string(v), 10, 64)
+		clear, err := strconv.ParseUint(string(v), 10, 64)
 		if err != nil {
 			return err
 		}
-		id.Hazy = obscure(id.Clear)
+		*id = ID(obscure(clear))
 	default:
 		return ErrInvalidDBValue
 	}
@@ -30,8 +27,8 @@ func (id *ID) Scan(value interface{}) error {
 }
 
 func (id ID) Value() (driver.Value, error) {
-	if id.Clear == 0 {
+	if id.IsZero() {
 		return nil, nil
 	}
-	return int64(id.Clear), nil
+	return int64(reveal(uint64(id))), nil
 }

@@ -5,10 +5,7 @@ import (
 	"sync"
 )
 
-type ID struct {
-	Clear uint64
-	Hazy  uint64
-}
+type ID uint64
 
 const IDLength = 13
 
@@ -16,6 +13,7 @@ var Prime *big.Int
 var Coprime *big.Int
 var Pepper uint64
 var uint64Max = new(big.Int).SetUint64(18446744073709551615)
+var Zero ID
 
 var pool = sync.Pool{
 	New: func() interface{} {
@@ -30,33 +28,32 @@ func Initialize(prime uint64, coprime uint64, pepper uint64) error {
 	}
 	Coprime = new(big.Int).SetUint64(coprime)
 	Pepper = pepper
+	Zero = ID(obscure(0))
 	return nil
 }
 
+func (id ID) Clear() uint64 {
+	return reveal(uint64(id))
+}
+
 func (id ID) IsZero() bool {
-	return id.Clear == 0
+	return id.Equal(Zero)
 }
 
 func (id ID) Equal(other ID) bool {
-	return id.Clear == other.Clear
+	return id == other
 }
 
 func (id ID) String() string {
-	return string(Base32Encode(id.Hazy))
+	return string(Base32Encode(uint64(id)))
 }
 
 func Obscure(id uint64) ID {
-	return ID{
-		Clear: id,
-		Hazy:  obscure(id),
-	}
+	return ID(obscure(id))
 }
 
 func Reveal(id uint64) ID {
-	return ID{
-		Clear: reveal(id),
-		Hazy:  id,
-	}
+	return ID(id)
 }
 
 func obscure(id uint64) uint64 {

@@ -8,16 +8,15 @@ import (
 var jsonNull = []byte("null")
 
 func (id ID) MarshalJSON() ([]byte, error) {
-	if id.Clear == 0 {
+	if id.IsZero() {
 		return jsonNull, nil
 	}
-	return json.Marshal(string(Base32Encode(id.Hazy)))
+	return json.Marshal(string(Base32Encode(uint64(id))))
 }
 
 func (id *ID) UnmarshalJSON(input []byte) error {
 	if bytes.Equal(input, jsonNull) {
-		id.Clear = 0
-		id.Hazy = 0
+		*id = Zero
 		return nil
 	}
 	var s string
@@ -29,7 +28,6 @@ func (id *ID) UnmarshalJSON(input []byte) error {
 	if err != nil {
 		return err
 	}
-	id.Hazy = val
-	id.Clear = reveal(val)
+	*id = ID(val)
 	return nil
 }
