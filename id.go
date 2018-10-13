@@ -33,11 +33,14 @@ func Initialize(prime uint64, coprime uint64, pepper uint64) error {
 }
 
 func (id ID) Clear() uint64 {
+	if id.IsZero() {
+		return 0
+	}
 	return reveal(uint64(id))
 }
 
 func (id ID) IsZero() bool {
-	return id.Equal(Zero)
+	return id == 0 || id.Equal(Zero)
 }
 
 func (id ID) Equal(other ID) bool {
